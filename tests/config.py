@@ -685,11 +685,28 @@ class TestBaseConfig(unittest.TestCase):
             ('config-27.ini', 'utc', True),
         )
         for filename, key, val in test_data:
+            if key in ('requirements_file', 'extra_settings'):
+                prev_val = getattr(fixture, key, val)
+
             setattr(fixture, key, val)  # Change value.
             args = self.args[0:1] + [self.conf(filename)] + self.args[1:]  # Load new config.
-            config_data = config.parse(args)
+            if key == 'requirements_file':
+                with patch('sys.exit') as exit_mock:
+                    config_data = config.parse(args)
+                    if exit_mock._mock_called:
+                        exit_mock.assert_called_with(9)
+            elif key == 'extra_settings':
+                with patch('sys.exit') as exit_mock:
+                    config_data = config.parse(args)
+                    if exit_mock._mock_called:
+                        exit_mock.assert_called_with(10)
+            else:
+                config_data = config.parse(args)
             self.unused(config_data)
             self.assertEqual(fixture, config_data)  # Check if config value and changed value equals.
+
+            if key in ('requirements_file', 'extra_settings'):
+                setattr(fixture, key, prev_val)  # Change value back to previous.
 
     @patch('sys.stdout')
     @patch('sys.stderr')

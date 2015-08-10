@@ -142,6 +142,16 @@ def parse(args):
         sys.stdout.write('Cannot dump because given configuration file "%s" is exists.\n' % args.config_dump)
         sys.exit(8)
 
+    if args.requirements_file is not None:
+        if not os.path.isfile(args.requirements_file):
+            sys.stdout.write('Given requirements file "%s" does not exists\n' % args.requirements_file)
+            sys.exit(9)
+
+    if args.extra_settings is not None:
+        if not os.path.isfile(args.extra_settings):
+            sys.stdout.write('Given extra settings file "%s" does not exists\n' % args.extra_settings)
+            sys.exit(10)
+
     for item in data.CONFIGURABLE_OPTIONS:
         action = parser._option_string_actions[item]
         choices = default = ""
